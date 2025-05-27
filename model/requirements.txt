@@ -1,2 +1,7 @@
 kagglehub
 pandas
+seaborn
+matplotlib
+scikit-learn
+imblearn
+tensorflow
