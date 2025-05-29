@@ -24,9 +24,11 @@ def load_model(model_path: str):
     except Exception as e:
         logger.error(f"Failed to load model from {model_path}: {e}")
         return None
-    
 
-def preprocess_input(scaler: StandardScaler, input_data: PatientRecordDTO) -> NDArray[np.float64]:
+
+def preprocess_input(
+    scaler: StandardScaler, input_data: PatientRecordDTO
+) -> NDArray[np.float64]:
     """
     Preprocess input data to ensure it matches the model's expected format.
 
@@ -42,9 +44,9 @@ def preprocess_input(scaler: StandardScaler, input_data: PatientRecordDTO) -> ND
     logger.debug(f"Raw input data: {preprocessed_input}")
 
     # Convert categorical variables to numerical
-    preprocessed_input['sex'] = 1 if preprocessed_input['sex'].lower() == 'male' else 0
-    preprocessed_input['is_smoker'] = 1 if preprocessed_input['is_smoker'] else 0
-    preprocessed_input['diabetes'] = 1 if preprocessed_input['diabetes'] else 0
+    preprocessed_input["sex"] = 1 if preprocessed_input["sex"].lower() == "male" else 0
+    preprocessed_input["is_smoker"] = 1 if preprocessed_input["is_smoker"] else 0
+    preprocessed_input["diabetes"] = 1 if preprocessed_input["diabetes"] else 0
 
     # Convert int to float for consistency
     for key in preprocessed_input:
@@ -53,9 +55,8 @@ def preprocess_input(scaler: StandardScaler, input_data: PatientRecordDTO) -> ND
 
     # Convert to numpy array
     preprocessed_array = np.array(list(preprocessed_input.values())).reshape(1, -1)
-    
+
     # Standardize the data
     preprocessed_data = scaler.transform(preprocessed_array)
-
 
     return preprocessed_data
