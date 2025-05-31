@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 import joblib
 
 
-def load_model(model_path: str):
+def load_model(model_path: str) -> Optional[object]:
     """
     Load a machine learning model from a specified path. Return None if loading fails.
 
@@ -22,8 +22,8 @@ def load_model(model_path: str):
         model = joblib.load(model_path)
         return model
     except Exception as e:
-        logger.error(f"Failed to load model from {model_path}: {e}")
-        return None
+        logger.debug(f"Failed to load model from {model_path}: {e}")
+        raise RuntimeError(f"Model could not be loaded from {model_path}") from e
 
 
 def preprocess_input(

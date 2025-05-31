@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv, find_dotenv
-from utility.model_utils import load_model, preprocess_input
+from utility import load_model, preprocess_input
 
-import dto
+from dto import PatientRecordDTO, PredictionResponse
 import os
 from loguru import logger
 
@@ -14,10 +14,6 @@ model_path = "".join([os.path.dirname(env_path), "/", os.getenv("MODEL_PATH")])
 scaler_path = "".join([os.path.dirname(env_path), "/", os.getenv("SCALER_PATH")])
 model = load_model(model_path)
 scaler = load_model(scaler_path)
-
-if model is None:
-    raise RuntimeError(f"Model could not be loaded from {model_path}")
-
 
 app = FastAPI()
 
@@ -32,8 +28,8 @@ def get_health():
     return {"status": "healthy"}
 
 
-@app.post("/predict", response_model=dto.PredictionResponse)
-def predict(patient_record: dto.PatientRecordDTO):
+@app.post("/predict", response_model=PredictionResponse)
+def predict(patient_record: PatientRecordDTO):
     """
     Predict the risk level and score for a given patient record.
 
@@ -52,7 +48,7 @@ def predict(patient_record: dto.PatientRecordDTO):
     prediction = model.predict_proba(model_input)[:, 1][0]
 
     # Create response
-    response = dto.PredictionResponse(
+    response = PredictionResponse(
         risk_level="low_risk"
         if prediction < 0.33
         else "medium_risk"
