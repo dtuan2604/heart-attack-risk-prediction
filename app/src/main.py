@@ -1,11 +1,13 @@
-from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse, JSONResponse
 from dotenv import load_dotenv, find_dotenv
 from utility import load_model, preprocess_input
-
 from dto import PatientRecordDTO, PredictionResponse
-import os
 from loguru import logger
+from fastapi.exceptions import RequestValidationError
+
+import os
+
 
 env_path = find_dotenv()
 load_dotenv(env_path)
@@ -19,17 +21,20 @@ app = FastAPI()
 
 
 @app.get("/", include_in_schema=False)
-def get_doc():
+def get_doc() -> RedirectResponse:
     return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
-def get_health():
-    return {"status": "healthy"}
+def get_health() -> JSONResponse:
+    return JSONResponse(
+        status_code=200,
+        content={"status": "healthy"},
+    )
 
 
 @app.post("/predict", response_model=PredictionResponse)
-def predict(patient_record: PatientRecordDTO):
+def predict(patient_record: PatientRecordDTO) -> JSONResponse:
     """
     Predict the risk level and score for a given patient record.
 
@@ -42,7 +47,10 @@ def predict(patient_record: PatientRecordDTO):
     logger.info("Received patient record for prediction: {}", patient_record)
 
     # Convert DTO to model input format
-    model_input = preprocess_input(scaler, patient_record)
+    preprocessed_input = preprocess_input(patient_record)
+
+    # Standardize the input data
+    model_input = scaler.transform(preprocessed_input)
 
     # Perform prediction
     prediction = model.predict_proba(model_input)[:, 1][0]
@@ -60,3 +68,17 @@ def predict(patient_record: PatientRecordDTO):
     logger.info("Prediction result: {}", response)
 
     return response
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """
+    Custom exception handler for request validation errors.
+    """
+    logger.error("Validation error: {}", exc)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors(), "body": exc.body},
+    )

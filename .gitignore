@@ -4,3 +4,5 @@ technique
 
 *cache
 .vscode
+
+.coverage

@@ -26,9 +26,7 @@ def load_model(model_path: str) -> Optional[object]:
         raise RuntimeError(f"Model could not be loaded from {model_path}") from e
 
 
-def preprocess_input(
-    scaler: StandardScaler, input_data: PatientRecordDTO
-) -> NDArray[np.float64]:
+def preprocess_input(input_data: PatientRecordDTO) -> NDArray[np.float64]:
     """
     Preprocess input data to ensure it matches the model's expected format.
 
@@ -56,7 +54,4 @@ def preprocess_input(
     # Convert to numpy array
     preprocessed_array = np.array(list(preprocessed_input.values())).reshape(1, -1)
 
-    # Standardize the data
-    preprocessed_data = scaler.transform(preprocessed_array)
-
-    return preprocessed_data
+    return preprocessed_array
