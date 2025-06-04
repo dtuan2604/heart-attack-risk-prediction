@@ -1,0 +1,10 @@
+loguru
+fastapi
+uvicorn
+joblib
+python-dotenv
+pytest
+httpx
+pytest-mock
+pytest-cov
+scikit-learn
