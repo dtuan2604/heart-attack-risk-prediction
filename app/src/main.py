@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse, JSONResponse
-from dotenv import load_dotenv, find_dotenv
 from utility import load_model, preprocess_input
 from dto import PatientRecordDTO, PredictionResponse
 from loguru import logger
@@ -9,11 +8,8 @@ from fastapi.exceptions import RequestValidationError
 import os
 
 
-env_path = find_dotenv()
-load_dotenv(env_path)
-
-model_path = "".join([os.path.dirname(env_path), "/", os.getenv("MODEL_PATH")])
-scaler_path = "".join([os.path.dirname(env_path), "/", os.getenv("SCALER_PATH")])
+model_path = os.getenv("MODEL_PATH")
+scaler_path = os.getenv("SCALER_PATH")
 model = load_model(model_path)
 scaler = load_model(scaler_path)
 

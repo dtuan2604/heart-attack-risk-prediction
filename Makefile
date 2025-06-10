@@ -12,7 +12,8 @@ JENKIN_COMPOSE_FILE := jenkin/docker-compose-jenkin.yml
 #------------------Start Dev Commands------------------#
 run-api-local:
 	@echo "Running API locally..."
-	cd app/src && uvicorn main:app --host 0.0.0.0 --port 8081
+	set -a && source .env && set +a && \
+	cd app/src && uvicorn main:app --host 0.0.0.0 --port 8082
 
 dev-unit-test:
 	@echo "Running unit tests..."

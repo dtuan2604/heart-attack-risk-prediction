@@ -2,5 +2,4 @@ loguru
 fastapi
 uvicorn
 joblib
-python-dotenv
 scikit-learn

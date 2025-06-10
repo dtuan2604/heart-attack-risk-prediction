@@ -1,6 +1,5 @@
 .env
 technique
-*.pkl
 
 *cache
 .vscode
