@@ -1,0 +1,58 @@
+# Core Jenkins functionality
+workflow-aggregator
+workflow-job
+workflow-cps
+workflow-multibranch
+pipeline-stage-view
+pipeline-model-definition
+credentials
+credentials-binding
+ssh-credentials
+plain-credentials
+
+# UI Enhancements
+blueocean
+dashboard-view
+
+# Git & GitHub integration
+git
+git-client
+github
+github-api
+github-branch-source
+scm-api
+
+# Docker support (for building & publishing images)
+docker-plugin
+docker-commons
+docker-workflow
+docker-java-api
+
+# Kubernetes support (for Jenkins agents)
+kubernetes
+kubernetes-client-api
+
+# Cloud, secret, and token management
+pipeline-utility-steps
+config-file-provider
+kubernetes-credentials
+matrix-auth
+
+# Webhooks and polling
+git-server
+
+# Useful extra pipeline steps
+pipeline-github
+pipeline-build-step
+ws-cleanup
+timestamper
+
+# Scripted and declarative pipeline support
+script-security
+structs
+token-macro
+
+# Optional but recommended
+mailer
+antisamy-markup-formatter
+htmlpublisher

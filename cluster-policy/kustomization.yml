@@ -1,0 +1,5 @@
+resources:
+  - 01-init-namespace.yml
+  - 02-service-account-config.yml
+  - 03-role-config.yml
+  - 04-role-binding-config.yml
