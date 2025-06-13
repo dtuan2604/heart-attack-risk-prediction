@@ -3,7 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: custom-jenkins:latest
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    image: tysonhoang/custom-jenkins:latest
     container_name: jenkins
     privileged: true
     ports:
