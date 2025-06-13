@@ -7,7 +7,6 @@ def instance = Jenkins.getInstance()
 
 def adminPassword = System.getenv("JENKINS_ADMIN_PASSWORD") ?: "admin"
 
-println "Admin password is: ${adminPassword}"
 
 def hudsonRealm = new HudsonPrivateSecurityRealm(false)
 hudsonRealm.createAccount("admin", adminPassword)

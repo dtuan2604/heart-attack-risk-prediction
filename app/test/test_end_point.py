@@ -6,8 +6,8 @@ import numpy as np
 import json
 from typing import List
 
-
-client = TestClient(app)
+MOCKED_MODEL_PATH = "test_model.pkl"
+MOCKED_SCALER_PATH = "test_scaler.pkl"
 
 
 def generate_random_patient_record() -> PatientRecordDTO:
@@ -72,8 +72,12 @@ def mock_model_and_scaler_for_good_patient_record(mocker, request):
         [[1 - mock_risk_score, mock_risk_score]]
     )
 
-    mocker.patch("src.main.model", mocked_model)
-    mocker.patch("src.main.scaler", mocked_scaler)
+    return_map = {
+        MOCKED_MODEL_PATH: mocked_model,
+        MOCKED_SCALER_PATH: mocked_scaler,
+    }
+
+    mocked = mocker.patch("joblib.load", side_effect=lambda path: return_map[path])
 
     return (
         mocked_model,
@@ -93,19 +97,46 @@ def mock_model_and_scaler_for_bad_patient_record(mocker, request):
     mocked_scaler.transform.return_value = np.random.rand(1, 9)
     mocked_model.predict_proba.return_value = np.array([[0.9, 0.1]])
 
-    mocker.patch("src.main.model", mocked_model)
-    mocker.patch("src.main.scaler", mocked_scaler)
+    return_map = {
+        MOCKED_MODEL_PATH: mocked_model,
+        MOCKED_SCALER_PATH: mocked_scaler,
+    }
+
+    mocked = mocker.patch("joblib.load", side_effect=lambda path: return_map[path])
 
     return (mocked_model, mocked_scaler, mock_error, mock_request)
 
 
-def test_root():
-    response = client.get("/")
+@pytest.fixture(autouse=True)
+def setup_environment(monkeypatch, mocker):
+    """Fixture to set up environment variables for testing."""
+    monkeypatch.setenv("MODEL_PATH", MOCKED_MODEL_PATH)
+    monkeypatch.setenv("SCALER_PATH", MOCKED_SCALER_PATH)
+
+
+def test_app_initialization(mocker):
+    mocked_load_model = mocker.patch("joblib.load", return_value=mocker.Mock())
+    with TestClient(app) as client:
+        pass
+
+    mocked_load_model.assert_any_call(MOCKED_MODEL_PATH)
+    mocked_load_model.assert_any_call(MOCKED_SCALER_PATH)
+    mocked_load_model.call_count == 2, "Model and scaler should be loaded once each"
+
+
+def test_root(mocker):
+    mocked_load_model = mocker.patch("joblib.load", return_value=mocker.Mock())
+    with TestClient(app) as client:
+        response = client.get("/")
+
     assert response.status_code == 200
 
 
-def test_get_health_endpoint():
-    response = client.get("/health")
+def test_get_health_endpoint(mocker):
+    mocked_load_model = mocker.patch("joblib.load", return_value=mocker.Mock())
+    with TestClient(app) as client:
+        response = client.get("/health")
+
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
@@ -120,9 +151,12 @@ def test_predict_endpoint_with_good_patient_record(
         expected_risk_score,
         patient_record,
     ) = mock_model_and_scaler_for_good_patient_record
-    response = client.post(
-        "/predict", content=patient_record, headers={"Content-Type": "application/json"}
-    )
+    with TestClient(app) as client:
+        response = client.post(
+            "/predict",
+            content=patient_record,
+            headers={"Content-Type": "application/json"},
+        )
 
     assert response.status_code == 200
     mocked_scaler.transform.assert_called_once()
@@ -140,9 +174,12 @@ def test_predict_endpoint_with_bad_patient_record(
         expected_error,
         mock_request,
     ) = mock_model_and_scaler_for_bad_patient_record
-    response = client.post(
-        "/predict", content=mock_request, headers={"Content-Type": "application/json"}
-    )
+    with TestClient(app) as client:
+        response = client.post(
+            "/predict",
+            content=mock_request,
+            headers={"Content-Type": "application/json"},
+        )
 
     assert response.status_code == 422  # Expecting validation error
     mocked_scaler.transform.assert_not_called()

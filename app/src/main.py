@@ -4,16 +4,26 @@ from utility import load_model, preprocess_input
 from dto import PatientRecordDTO, PredictionResponse
 from loguru import logger
 from fastapi.exceptions import RequestValidationError
-
+from contextlib import asynccontextmanager
 import os
 
 
-model_path = os.getenv("MODEL_PATH")
-scaler_path = os.getenv("SCALER_PATH")
-model = load_model(model_path)
-scaler = load_model(scaler_path)
+model = None
+scaler = None
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model, scaler
+
+    logger.info("Loading the model and scaler...")
+    model = load_model(os.getenv("MODEL_PATH"))
+    scaler = load_model(os.getenv("SCALER_PATH"))
+    yield
+    logger.info("Shutting down the application...")
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/", include_in_schema=False)

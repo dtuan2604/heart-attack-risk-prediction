@@ -8,11 +8,6 @@ def nameSpace = System.getenv("K8S_NAMESPACE") ?: "model-serving"
 def jenkinsUrl = System.getenv("JENKINS_URL")
 def jenkinsTunnel = System.getenv("JENKINS_TUNNEL")
 
-println "k8s_server: ${serverUrl}\n" +
-        "k8s_ca_crt: ${caCert}\n" +
-        "k8s_namespace: ${nameSpace}\n" +
-        "jenkins_url: ${jenkinsUrl}\n" +
-        "jenkins_tunnel: ${jenkinsTunnel}"
 
 def k8sCloud = new KubernetesCloud("kubernetes")
 

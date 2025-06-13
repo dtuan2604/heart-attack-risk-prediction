@@ -3,27 +3,49 @@ pipeline {
 
     environment {
         registry = 'tysonhoang/heart-attack-risk-prediction'
-        VERSION="$(git describe --tags --always)-build-${BUILD_NUMBER}"
-        registryCredentials - 'dockerhub-creds'
+        registryCredentials = 'dockerhub-creds'
     }
 
     stages{
-        stage('Install Dependencies') {
+        stage('Run Tests') {
+            agent {
+                docker {
+                    image 'python:3.9'
+                }
+            }
             steps {
                 sh '''
-                    python3 -m venv test
-                    source test/bin/activate
-                    pip -r install app/non-prod-requirements.txt
+                    python -m venv test-env
+                    . test-env/bin/activate
+                    echo "Installing dependencies and running tests..."
+                    pip install --no-cache-dir -r app/non-prod-requirements.txt
+                    export PYTHONPATH=app/src
+                    export MODEL_PATH=../../model/model.pkl
+                    export SCALER_PATH=../../model/scaler.pkl
+                    pytest
                 '''
+            }
+
+            post {
+                always {
+                    sh '''
+                        echo "Cleaning up virtual environment..."
+                        rm -rf test-env
+                    '''
+                }
             }
         }
 
-        stage('Run Tests') {
+        stage('Get Image Version Tag') {
             steps {
-                sh '''
-                    echo "Running tests..."
-                    PYTHONPATH=app/src pytest
-                '''
+                script {
+                    def versionTag = sh(
+                        script: 'git describe --tags --always',
+                        returnStdout: true
+                    ).trim()
+                    env.VERSION = "${versionTag}-build-${env.BUILD_NUMBER}"
+                    echo "Image VERSION: ${env.VERSION}"
+                }
             }
         }
 
@@ -37,6 +59,7 @@ pipeline {
                     docker.withRegistry('', registryCredentials) {
                         dockerImage.push()
                         dockerImage.push('latest') // Optionally push 'latest' tag
+                    }
                 }
             }
         }

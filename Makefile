@@ -31,7 +31,8 @@ run-local-jenkin-docker:
 	"apt update > /dev/null 2>&1 && \
 	apt install -y dnsutils > /dev/null 2>&1 && \
 	IP=\$$(dig +short A host.docker.internal) && \
-	[ -n \"\$$IP\" ] && echo \"\$$IP minikube\" >> /etc/hosts"
+	[ -n \"\$$IP\" ] && echo \"\$$IP minikube\" >> /etc/hosts &&\
+	chgrp docker /var/run/docker.sock"
 
 # I am using MacOS M1, so I need to use the `--platform` flag to build for Linux
 push-jenkin-image:
@@ -43,7 +44,10 @@ push-jenkin-image:
 update-cluster-policy:
 	@echo "Updating cluster policy..."
 	kubectl apply -k cluster-policy/
-# kubectl create token jenkins-deployer -n model-serving
+
+get-jenkin-deployer-token:
+	@echo "Getting Jenkins deployer token..."
+	kubectl create token jenkins-deployer -n model-serving
 
 
 #------------------End Cluster Command------------------#
