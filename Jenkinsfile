@@ -65,8 +65,23 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes Cluster') {
+            agent{
+                kubernetes {
+                    containerTemplate {
+                        name 'helm'
+                        image 'tysonhoang/jenkin-with-cloud-plugin:latest'
+                        serviceAccount 'jenkins-deployer'
+                        alwaysPullImage true
+                    }
+                }
+            }
+
             steps {
-                echo 'TO-BE-COMPLETED: Deploy to Kubernetes Cluster'
+                script {
+                    container('helm') {
+                        sh("helm upgrade --install hara ./helm-charts/hara --namespace model-serving")
+                    }
+                }
             }
         }
     }

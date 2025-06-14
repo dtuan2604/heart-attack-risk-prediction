@@ -1,12 +1,6 @@
 services:
-  jenkins:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
-    image: tysonhoang/custom-jenkins:latest
+  ci-cd-pipeline:
+    image: tysonhoang/jenkin-with-cloud-plugin:latest
     container_name: jenkins
     privileged: true
     ports:

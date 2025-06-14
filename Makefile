@@ -4,6 +4,7 @@
 
 # ------------------Start Configuration------------------#
 JENKIN_COMPOSE_FILE := jenkin/docker-compose-jenkin.yml
+CLUSTER_POLICY_DIR := cluster-policy/
 
 # ------------------End Configuration------------------#
 
@@ -25,7 +26,6 @@ clean-up-python-cache:
 
 run-local-jenkin-docker:
 	@echo "Building Jenkins Docker image..."
-# docker compose -f ${JENKIN_COMPOSE_FILE} up --build -d && docker exec -u 0 -it jenkins /bin/bash -c "apt update > /dev/null 2>&1 && apt install -y dnsutils > /dev/null 2>&1 && echo `dig +short A host.docker.internal` minikube >> /etc/hosts"
 	docker compose -f jenkin/docker-compose-jenkin.yml up --build -d && \
 	docker exec -u 0 -it jenkins /bin/bash -c \
 	"apt update > /dev/null 2>&1 && \
@@ -39,15 +39,23 @@ push-jenkin-image:
 	@echo "Building and pushing Jenkins Docker image with multi architecture option to Docker Hub..."
 	docker buildx build --platform linux/amd64,linux/arm64 -t tysonhoang/jenkin-with-cloud-plugin:latest --push jenkin
 
+deploy-helm-locally:
+	@echo "Deploying Helm chart locally..."
+	helm upgrade --install hara helm-charts/hara --namespace model-serving
+
 #------------------End Dev Commands------------------#
 #------------------Start Cluster Command------------------#
 update-cluster-policy:
 	@echo "Updating cluster policy..."
-	kubectl apply -k cluster-policy/
+	kubectl apply -k $(CLUSTER_POLICY_DIR)
 
 get-jenkin-deployer-token:
 	@echo "Getting Jenkins deployer token..."
 	kubectl create token jenkins-deployer -n model-serving
+
+start-nginx-system:
+	@echo "Starting Nginx system in cluster..."
+	helm upgrade --install nginx-ingress helm-charts/nginx-ingress --namespace nginx-system
 
 
 #------------------End Cluster Command------------------#
@@ -56,3 +64,11 @@ get-jenkin-deployer-token:
 help:
 	@echo "Makefile commands:"
 	@echo "\t make run-api-local\t\t- Run the API locally"
+	@echo "\t make dev-unit-test\t\t- Run unit tests"
+	@echo "\t make clean-up-python-cache\t- Clean up Python cache"
+	@echo "\t make run-local-jenkin-docker\t- Run Jenkins in Docker locally"
+	@echo "\t make push-jenkin-image\t\t- Build and push Jenkins Docker image to Docker Hub"
+	@echo "\t make deploy-helm-locally\t- Deploy Helm chart locally"
+	@echo "\t make update-cluster-policy\t- Update cluster policy"
+	@echo "\t make get-jenkin-deployer-token\t- Get Jenkins deployer token"
+	@echo "\t make start-nginx-system\t- Start Nginx system in cluster"

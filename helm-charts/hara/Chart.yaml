@@ -1,0 +1,11 @@
+apiVersion: v2
+name: hara
+description: Helm chart for heart-attack-risk-prediction application
+
+type: application
+
+version: 0.1.0
+
+maintainers:
+- email: tysonhoanglearning@gmail.com
+  name: TysonHoang
