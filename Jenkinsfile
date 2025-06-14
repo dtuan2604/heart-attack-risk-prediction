@@ -68,13 +68,18 @@ pipeline {
         stage('Deploy to Kubernetes Cluster') {
             agent{
                 kubernetes {
+                    namespace 'model-serving'
                     serviceAccount 'jenkins-deployer'
-                    namespace "model-serving"
-                    containerTemplate {
-                        name 'helm'
-                        image 'tysonhoang/jenkin-with-cloud-plugin:latest'
-                        alwaysPullImage true
-                    }
+                    yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        spec:
+                        serviceAccountName: jenkins-deployer
+                        containers:
+                        - name: helm
+                            image: tysonhoang/jenkin-with-cloud-plugin:latest
+                            imagePullPolicy: Always
+                    """
                 }
             }
 
