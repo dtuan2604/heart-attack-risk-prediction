@@ -59,7 +59,16 @@ pipeline {
                     echo 'Pushing Docker image...'
                     docker.withRegistry('', registryCredentials) {
                         dockerImage.push()
-                        dockerImage.push('latest') // Optionally push 'latest' tag
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+
+            post {
+                always {
+                    script {
+                        echo 'Cleaning up unused local images...'
+                        sh 'docker image prune -f'
                     }
                 }
             }
@@ -86,7 +95,7 @@ pipeline {
             steps {
                 script {
                     container('helm') {
-                        sh("helm upgrade --install hara ./helm-charts/hara --namespace model-serving")
+                        sh("helm upgrade --install hara ./helm-charts/hara --namespace model-serving --set image.tag='${VERSION}'")
                     }
                 }
             }
