@@ -53,7 +53,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    dockerImage = docker.build("${registry}:${VERSION}", "-f app/Dockerfile .")
+                    def dockerImage = docker.build("${registry}:${VERSION}", "-f app/Dockerfile .")
 
                     echo 'Pushing Docker image...'
                     docker.withRegistry('', registryCredentials) {
@@ -67,10 +67,10 @@ pipeline {
         stage('Deploy to Kubernetes Cluster') {
             agent{
                 kubernetes {
+                    serviceAccount 'jenkins-deployer'
                     containerTemplate {
                         name 'helm'
                         image 'tysonhoang/jenkin-with-cloud-plugin:latest'
-                        serviceAccount 'jenkins-deployer'
                         alwaysPullImage true
                     }
                 }
