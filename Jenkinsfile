@@ -77,8 +77,8 @@ pipeline {
                         serviceAccountName: jenkins-deployer
                         containers:
                         - name: helm
-                            image: tysonhoang/jenkin-with-cloud-plugin:latest
-                            imagePullPolicy: Always
+                          image: tysonhoang/jenkin-with-cloud-plugin:latest
+                          imagePullPolicy: Always
                     """
                 }
             }
