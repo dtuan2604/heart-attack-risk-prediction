@@ -4,6 +4,7 @@ pipeline {
     environment {
         registry = 'tysonhoang/heart-attack-risk-prediction'
         registryCredentials = 'dockerhub-creds'
+        k8snamespace = 'model-serving'
     }
 
     stages{
@@ -68,6 +69,7 @@ pipeline {
             agent{
                 kubernetes {
                     serviceAccount 'jenkins-deployer'
+                    namespace "model-serving"
                     containerTemplate {
                         name 'helm'
                         image 'tysonhoang/jenkin-with-cloud-plugin:latest'
