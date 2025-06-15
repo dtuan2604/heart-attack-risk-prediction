@@ -83,11 +83,11 @@ pipeline {
                         apiVersion: v1
                         kind: Pod
                         spec:
-                        serviceAccountName: jenkins-deployer
-                        containers:
-                        - name: helm
-                          image: tysonhoang/jenkin-with-cloud-plugin:latest
-                          imagePullPolicy: Always
+                            serviceAccountName: jenkins-deployer
+                            containers:
+                            - name: helm
+                              image: tysonhoang/jenkin-with-cloud-plugin:latest
+                              imagePullPolicy: Always
                     """
                 }
             }

@@ -27,14 +27,14 @@ clean-up-python-cache:
 run-local-jenkin-docker:
 	@echo "Building Jenkins Docker image..."
 	docker compose -f jenkin/docker-compose-jenkin.yml up --build -d && \
-	docker exec -u 0 -it jenkins /bin/bash -c \
+	docker exec -u 0 -it ci-cd-pipeline /bin/bash -c \
 	"apt update > /dev/null 2>&1 && \
 	apt install -y dnsutils > /dev/null 2>&1 && \
 	IP=\$$(dig +short A host.docker.internal) && \
 	[ -n \"\$$IP\" ] && echo \"\$$IP minikube\" >> /etc/hosts &&\
 	chgrp docker /var/run/docker.sock"
 
-# I am using MacOS M1, so I need to use the `--platform` flag to build for Linux
+# I am using MacOS M1, so that I need to use the `--platform` flag to build for Linux
 push-jenkin-image:
 	@echo "Building and pushing Jenkins Docker image with multi architecture option to Docker Hub..."
 	docker buildx build --platform linux/amd64,linux/arm64 -t tysonhoang/jenkin-with-cloud-plugin:latest --push jenkin
