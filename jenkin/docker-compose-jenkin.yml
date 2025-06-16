@@ -1,18 +1,15 @@
 services:
-  jenkins:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: custom-jenkins:latest
-    container_name: jenkins
+  ci-cd-pipeline:
+    image: tysonhoang/jenkin-with-cloud-plugin:latest
+    container_name: ci-cd-pipeline
     privileged: true
     ports:
       - 8081:8080
       - 50000:50000
     restart: unless-stopped
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
     env_file:
       - ../.env
 volumes:

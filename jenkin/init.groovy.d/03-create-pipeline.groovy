@@ -8,6 +8,7 @@ def instance = Jenkins.getInstance()
 
 def jobName = System.getenv("JENKIN_JOB_NAME") ?: "my-auto-pipeline"
 def repoUrl = System.getenv("REPO_URL") ?: "jenkins"
+def releaseBranch = System.getenv("GIT_RELEASE_BRANCH") ?: "release"
 def credentialsId = "github-token"
 
 if (instance.getItem(jobName) == null) {
@@ -15,7 +16,7 @@ if (instance.getItem(jobName) == null) {
 
     def scm = new GitSCM(
         GitSCM.createRepoList(repoUrl, credentialsId),
-        [new BranchSpec("*/release")],
+        [new BranchSpec("*/${releaseBranch}")],
         false, Collections.<SubmoduleConfig>emptyList(),
         null, null, []
     )
@@ -25,8 +26,5 @@ if (instance.getItem(jobName) == null) {
     job.addTrigger(new com.cloudbees.jenkins.GitHubPushTrigger())
     job.save()
 }
-
-println "jenkin_job_name: ${jobName}"
-println "repo_url: ${repoUrl}"
 
 instance.save()

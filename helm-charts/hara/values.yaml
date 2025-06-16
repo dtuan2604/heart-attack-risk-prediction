@@ -1,0 +1,10 @@
+nameSpace: model-serving
+
+nginxHostName: hospital.heart.com
+
+image:
+  repository: tysonhoang/heart-attack-risk-prediction
+  tag: latest
+  pullPolicy: Always
+
+appVersion: "1.0.0"

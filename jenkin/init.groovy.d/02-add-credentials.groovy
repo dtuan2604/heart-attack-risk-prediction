@@ -55,11 +55,3 @@ if (k8s_token) {
 } else {
     println "⚠ K8S_TOKEN not provided"
 }
-
-
-
-println "githubtoken: ${githubToken}"
-println "githubuser: ${githubUser}"
-println "dockerhubuser: ${dockerUser}"
-println "dockerhubpass: ${dockerPass}"
-println "k8s_token: ${k8s_token}"
