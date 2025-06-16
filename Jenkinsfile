@@ -4,6 +4,7 @@ pipeline {
     environment {
         registry = 'tysonhoang/heart-attack-risk-prediction'
         registryCredentials = 'dockerhub-creds'
+        k8snamespace = 'model-serving'
     }
 
     stages{
@@ -53,12 +54,21 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    dockerImage = docker.build("${registry}:${VERSION}", "-f app/Dockerfile .")
+                    def dockerImage = docker.build("${registry}:${VERSION}", "-f app/Dockerfile .")
 
                     echo 'Pushing Docker image...'
                     docker.withRegistry('', registryCredentials) {
                         dockerImage.push()
-                        dockerImage.push('latest') // Optionally push 'latest' tag
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+
+            post {
+                always {
+                    script {
+                        echo 'Cleaning up unused local images...'
+                        sh 'docker image prune -f'
                     }
                 }
             }
@@ -67,19 +77,25 @@ pipeline {
         stage('Deploy to Kubernetes Cluster') {
             agent{
                 kubernetes {
-                    containerTemplate {
-                        name 'helm'
-                        image 'tysonhoang/jenkin-with-cloud-plugin:latest'
-                        serviceAccount 'jenkins-deployer'
-                        alwaysPullImage true
-                    }
+                    namespace 'model-serving'
+                    serviceAccount 'jenkins-deployer'
+                    yaml """
+                        apiVersion: v1
+                        kind: Pod
+                        spec:
+                            serviceAccountName: jenkins-deployer
+                            containers:
+                            - name: helm
+                              image: tysonhoang/jenkin-with-cloud-plugin:latest
+                              imagePullPolicy: Always
+                    """
                 }
             }
 
             steps {
                 script {
                     container('helm') {
-                        sh("helm upgrade --install hara ./helm-charts/hara --namespace model-serving")
+                        sh("helm upgrade --install hara ./helm-charts/hara --namespace model-serving --set image.tag='${VERSION}'")
                     }
                 }
             }

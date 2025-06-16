@@ -27,3 +27,14 @@ rules:
       - create
       - get
       - update
+  - apiGroups: ["networking.k8s.io", "extensions"]
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete

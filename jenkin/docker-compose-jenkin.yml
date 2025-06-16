@@ -1,7 +1,7 @@
 services:
   ci-cd-pipeline:
     image: tysonhoang/jenkin-with-cloud-plugin:latest
-    container_name: jenkins
+    container_name: ci-cd-pipeline
     privileged: true
     ports:
       - 8081:8080
