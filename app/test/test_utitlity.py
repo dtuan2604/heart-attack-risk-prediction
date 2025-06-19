@@ -4,24 +4,27 @@ import pytest
 import numpy as np
 
 
-def test_load_model_success(mocker):
+@pytest.mark.asyncio
+async def test_load_model_success(mocker):
     mock_model = mocker.Mock()
     mocker.patch("joblib.load", return_value=mock_model)
 
-    model = load_model("fake_model_path.pkl")
+    model = await load_model("fake_model_path.pkl")
     assert model == mock_model
 
 
-def test_load_model_failure(mocker):
+@pytest.mark.asyncio
+async def test_load_model_failure(mocker):
     mocker.patch("joblib.load", side_effect=Exception("Load failed"))
 
     with pytest.raises(
         RuntimeError, match="Model could not be loaded from fake_model_path.pkl"
     ):
-        load_model("fake_model_path.pkl")
+        await load_model("fake_model_path.pkl")
 
 
-def test_preprocess_input():
+@pytest.mark.asyncio
+async def test_preprocess_input():
     patient_record = PatientRecordDTO(
         age=45,
         sex="male",
@@ -34,7 +37,7 @@ def test_preprocess_input():
         diabetes=False,
     )
 
-    actual_output = preprocess_input(patient_record)
+    actual_output = await preprocess_input(patient_record)
 
     assert isinstance(actual_output, np.ndarray)
     assert actual_output.shape == (1, 9)

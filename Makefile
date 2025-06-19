@@ -18,21 +18,25 @@ run-api-local:
 
 dev-unit-test:
 	@echo "Running unit tests..."
-	PYTHONPATH=app/src pytest --cache-clear
+	PYTHONPATH=app/src DISABLE_TRACING=true pytest --cache-clear
 
 clean-up-python-cache:
 	@echo "Cleaning up Python cache..."
 	find . -type d \( -name ".pytest_cache" -o -name "__pycache__" \) -exec rm -rvf {} +
 
 run-local-jenkin-docker:
-	@echo "Building Jenkins Docker image..."
-	docker compose -f jenkin/docker-compose-jenkin.yml up --build -d && \
+	@echo "Running Jenkins Docker image..."
+	docker compose -f docker-compose-jenkin.yml up --build -d && \
 	docker exec -u 0 -it ci-cd-pipeline /bin/bash -c \
 	"apt update > /dev/null 2>&1 && \
 	apt install -y dnsutils > /dev/null 2>&1 && \
 	IP=\$$(dig +short A host.docker.internal) && \
 	[ -n \"\$$IP\" ] && echo \"\$$IP minikube\" >> /etc/hosts &&\
 	chgrp docker /var/run/docker.sock"
+
+run-local-jaeger:
+	@echo "Running Jaeger Docker image..."
+	docker compose -f docker-compose-jaeger.yml up --build -d
 
 # I am using MacOS M1, so that I need to use the `--platform` flag to build for Linux
 push-jenkin-image:

@@ -5,9 +5,11 @@ from loguru import logger
 import numpy as np
 from numpy.typing import NDArray
 import joblib
+from .tracing_utils import trace_span
 
 
-def load_model(model_path: str) -> Optional[object]:
+@trace_span("load_model")
+async def load_model(model_path: str) -> Optional[object]:
     """
     Load a machine learning model from a specified path. Return None if loading fails.
 
@@ -26,7 +28,8 @@ def load_model(model_path: str) -> Optional[object]:
         raise RuntimeError(f"Model could not be loaded from {model_path}") from e
 
 
-def preprocess_input(input_data: PatientRecordDTO) -> NDArray[np.float64]:
+@trace_span("preprocess_input")
+async def preprocess_input(input_data: PatientRecordDTO) -> NDArray[np.float64]:
     """
     Preprocess input data to ensure it matches the model's expected format.
 

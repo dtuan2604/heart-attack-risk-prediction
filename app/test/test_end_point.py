@@ -91,6 +91,7 @@ def mock_model_and_scaler_for_good_patient_record(mocker, request):
 @pytest.fixture(params=bad_patient_record())
 def mock_model_and_scaler_for_bad_patient_record(mocker, request):
     mock_error, mock_request = request.param
+
     mocked_scaler = mocker.Mock()
     mocked_model = mocker.Mock()
 
@@ -116,12 +117,15 @@ def setup_environment(monkeypatch, mocker):
 
 def test_app_initialization(mocker):
     mocked_load_model = mocker.patch("joblib.load", return_value=mocker.Mock())
+    mocked_init_tracer = mocker.patch("src.main.init_tracer")
     with TestClient(app) as client:
         pass
 
     mocked_load_model.assert_any_call(MOCKED_MODEL_PATH)
     mocked_load_model.assert_any_call(MOCKED_SCALER_PATH)
     mocked_load_model.call_count == 2, "Model and scaler should be loaded once each"
+    mocked_init_tracer.assert_called_once_with(service_name="hara-service")
+    mocked_init_tracer.call_count == 1, "Tracer should be initialized once"
 
 
 def test_root(mocker):

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse, JSONResponse
-from utility import load_model, preprocess_input
+from utility import load_model, preprocess_input, init_tracer, trace_span
 from dto import PatientRecordDTO, PredictionResponse
 from loguru import logger
 from fastapi.exceptions import RequestValidationError
@@ -15,10 +15,11 @@ scaler = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model, scaler
+    init_tracer(service_name="hara-service")
 
     logger.info("Loading the model and scaler...")
-    model = load_model(os.getenv("MODEL_PATH"))
-    scaler = load_model(os.getenv("SCALER_PATH"))
+    model = await load_model(os.getenv("MODEL_PATH"))
+    scaler = await load_model(os.getenv("SCALER_PATH"))
     yield
     logger.info("Shutting down the application...")
 
@@ -27,12 +28,14 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/", include_in_schema=False)
-def get_doc() -> RedirectResponse:
+@trace_span("get_root")
+async def get_doc() -> RedirectResponse:
     return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
-def get_health() -> JSONResponse:
+@trace_span("get_health")
+async def get_health() -> JSONResponse:
     return JSONResponse(
         status_code=200,
         content={"status": "healthy"},
@@ -40,7 +43,8 @@ def get_health() -> JSONResponse:
 
 
 @app.post("/predict", response_model=PredictionResponse)
-def predict(patient_record: PatientRecordDTO) -> JSONResponse:
+@trace_span("prediction_process")
+async def predict(patient_record: PatientRecordDTO) -> JSONResponse:
     """
     Predict the risk level and score for a given patient record.
 
@@ -53,7 +57,7 @@ def predict(patient_record: PatientRecordDTO) -> JSONResponse:
     logger.info("Received patient record for prediction: {}", patient_record)
 
     # Convert DTO to model input format
-    preprocessed_input = preprocess_input(patient_record)
+    preprocessed_input = await preprocess_input(patient_record)
 
     # Standardize the input data
     model_input = scaler.transform(preprocessed_input)
