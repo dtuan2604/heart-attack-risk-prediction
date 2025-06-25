@@ -1,0 +1,31 @@
+networks:
+  local-containers:
+    driver: bridge
+
+services:
+  api:
+    build:
+      context: ../../
+      dockerfile: app/Dockerfile
+    container_name: heart-attack-prediction-api
+    environment:
+      - DISABLE_TRACING=true
+    networks:
+      - local-containers
+    ports:
+      - "8080:30000"
+    restart: unless-stopped
+
+  client_app:
+    build:
+      context: ../../client/
+      dockerfile: Dockerfile
+    container_name: heart-attack-prediction-client
+    environment:
+      - API_URL=http://heart-attack-prediction-api:30000/predict
+      - SLEEP_INTERVAL=5
+    networks:
+      - local-containers
+    restart: unless-stopped
+    depends_on:
+      - api

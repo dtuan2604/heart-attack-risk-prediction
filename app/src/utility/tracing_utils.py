@@ -17,6 +17,10 @@ def init_tracer(service_name: str):
     Initialize the tracer with the given service name.
     This function should be called at the start of the application.
     """
+    if os.getenv("DISABLE_TRACING", "false").lower() == "true":
+        logger.info("Tracing is disabled. Skipping tracer initialization.")
+        return
+
     global tracer
     if tracer is None:
         trace.set_tracer_provider(
