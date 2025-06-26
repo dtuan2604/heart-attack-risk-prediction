@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse, JSONResponse
-from utility import load_model, preprocess_input, init_tracer, trace_span
+from utility import load_model, preprocess_input, init_tracer, trace_span, setup_logging
 from dto import PatientRecordDTO, PredictionResponse
 from loguru import logger
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
 import os
 
+setup_logging()
 
 model = None
 scaler = None
