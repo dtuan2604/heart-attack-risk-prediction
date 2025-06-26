@@ -1,0 +1,33 @@
+logging {
+    level = "info"
+    format = "logfmt"
+}
+// 1. Set up a host mount to docker, set up a rule to relabel container metadata for routing and log config
+discovery.docker "linux" {
+    host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "logs_integrations_docker" {
+    targets = []
+
+    rule {
+        source_labels = ["__meta_docker_container_name"]
+        regex = "/(.*)"
+        target_label = "service_name"
+    }
+}
+
+// 2. Pull logs from all containers running on Docker
+loki.source.docker "default" {
+    host       = "unix:///var/run/docker.sock"
+    targets    = discovery.docker.linux.targets
+    labels     = {"platform" = "docker"}
+    relabel_rules = discovery.relabel.logs_integrations_docker.rules
+    forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

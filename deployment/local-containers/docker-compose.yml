@@ -1,5 +1,5 @@
 networks:
-  local-containers:
+  hara-local-containers:
     driver: bridge
 
 services:
@@ -11,10 +11,16 @@ services:
     environment:
       - DISABLE_TRACING=true
     networks:
-      - local-containers
+      - hara-local-containers
     ports:
       - "8080:30000"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   client_app:
     build:
@@ -25,7 +31,30 @@ services:
       - API_URL=http://heart-attack-prediction-api:30000/predict
       - SLEEP_INTERVAL=5
     networks:
-      - local-containers
+      - hara-local-containers
     restart: unless-stopped
     depends_on:
       - api
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: alloy
+    volumes:
+      - ./config/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: ["run", "--server.http.listen-addr=0.0.0.0:12345", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy"]
+    ports:
+      - "12345:12345"
+    networks:
+      - hara-local-containers
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    volumes:
+      - ./config/loki-local-config.yml:/etc/loki/local-config.yml:ro
+    command: ["-config.file=/etc/loki/local-config.yml"]
+    ports:
+      - "3100:3100"
+    networks:
+      - hara-local-containers
