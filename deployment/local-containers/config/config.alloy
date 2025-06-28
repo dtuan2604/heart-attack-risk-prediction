@@ -1,7 +1,3 @@
-logging {
-    level = "info"
-    format = "logfmt"
-}
 // 1. Set up a host mount to docker, set up a rule to relabel container metadata for routing and log config
 discovery.docker "linux" {
     host = "unix:///var/run/docker.sock"

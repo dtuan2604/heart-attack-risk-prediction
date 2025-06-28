@@ -29,7 +29,7 @@ services:
     container_name: heart-attack-prediction-client
     environment:
       - API_URL=http://heart-attack-prediction-api:30000/predict
-      - SLEEP_INTERVAL=5
+      - SLEEP_INTERVAL=10
     networks:
       - hara-local-containers
     restart: unless-stopped
@@ -56,5 +56,19 @@ services:
     command: ["-config.file=/etc/loki/local-config.yml"]
     ports:
       - "3100:3100"
+    networks:
+      - hara-local-containers
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/service-dashboards:/var/lib/grafana/dashboards
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=changeme
     networks:
       - hara-local-containers
