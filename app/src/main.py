@@ -16,11 +16,11 @@ scaler = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model, scaler
-    init_tracer(service_name="hara-service")
+    init_tracer(service_name=os.getenv("SERVICE_NAME", "hara-service"))
 
     logger.info("Loading the model and scaler...")
-    model = await load_model(os.getenv("MODEL_PATH"))
-    scaler = await load_model(os.getenv("SCALER_PATH"))
+    model = await load_model(os.getenv("MODEL_PATH", "model/model.pkl"))
+    scaler = await load_model(os.getenv("SCALER_PATH", "model/scaler.pkl"))
     yield
     logger.info("Shutting down the application...")
 

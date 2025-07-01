@@ -9,7 +9,8 @@ services:
       dockerfile: app/Dockerfile
     container_name: heart-attack-prediction-api
     environment:
-      - DISABLE_TRACING=true
+      - DISABLE_TRACING=false
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
     networks:
       - hara-local-containers
     ports:
@@ -53,11 +54,37 @@ services:
     container_name: loki
     volumes:
       - ./config/loki-local-config.yml:/etc/loki/local-config.yml:ro
+      - ./config/loki-data:/loki
     command: ["-config.file=/etc/loki/local-config.yml"]
     ports:
       - "3100:3100"
     networks:
       - hara-local-containers
+
+  memcached:
+    image: memcached:1.6.38
+    container_name: memcached
+    ports:
+      - "11211:11211"
+    networks:
+      - hara-local-containers
+    environment:
+      - MEMCACHED_MAX_MEMORY=64m  # Set the maximum memory usage
+      - MEMCACHED_THREADS=4       # Number of threads to use
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    volumes:
+      - ./config/tempo.yml:/etc/tempo.yml
+      - ./config/tempo-data:/var/tempo
+    command: ["-config.file=/etc/tempo.yml"]
+    ports:
+      - 3200:3200
+    networks:
+      - hara-local-containers
+    depends_on:
+      - memcached
 
   grafana:
     image: grafana/grafana:latest
@@ -65,6 +92,7 @@ services:
     volumes:
       - ./config/grafana/provisioning:/etc/grafana/provisioning
       - ./config/grafana/service-dashboards:/var/lib/grafana/dashboards
+      - ./config/grafana-data:/var/libb/grafana
     ports:
       - 3000:3000
     environment:
@@ -72,3 +100,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=changeme
     networks:
       - hara-local-containers
+
+volumes:
+  tempo-data:
+  loki-data:
+  grafana-data:

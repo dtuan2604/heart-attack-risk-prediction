@@ -1,7 +1,6 @@
 from functools import wraps
 from opentelemetry import trace
 from loguru import logger
-from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -32,7 +31,7 @@ def init_tracer(service_name: str):
             "OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317"
         )
 
-        otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint)
+        otlp_exporter = OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True)
 
         span_processor = BatchSpanProcessor(otlp_exporter)
         trace.get_tracer_provider().add_span_processor(span_processor)
