@@ -28,7 +28,7 @@ loki.write "local" {
   }
 }
 
-// 3. Set up a opentelemetry tracing ingester
+// 3. Set up opentelemetry tracing ingester and exporter
 otelcol.receiver.otlp "default" {
     http {}
     grpc {}
@@ -51,4 +51,64 @@ otelcol.exporter.otlp "tempo" {
             insecure = true
         }
     }
+}
+
+// 4. Set up metric ingester and exporter from docker container
+prometheus.exporter.cadvisor "local" {
+  docker_host = "unix:///var/run/docker.sock"
+
+  storage_duration = "5m"
+}
+
+prometheus.scrape "scraper" {
+  targets    = prometheus.exporter.cadvisor.local.targets
+  forward_to = [ prometheus.remote_write.default.receiver ]
+
+  scrape_interval = "10s"
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+// 5. Set up metric ingester and exporter from host machine
+prometheus.exporter.unix "integrations_node_exporter" {
+  disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+  enable_collectors = ["meminfo"]
+
+  filesystem {
+    fs_types_exclude     = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|tmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+    mount_points_exclude = "^/(dev|proc|run/credentials/.+|sys|var/lib/docker/.+)($|/)"
+    mount_timeout        = "5s"
+  }
+
+  netclass {
+    ignored_devices = "^(veth.*|cali.*|[a-f0-9]{15})$"
+  }
+
+  netdev {
+    device_exclude = "^(veth.*|cali.*|[a-f0-9]{15})$"
+  }
+}
+
+discovery.relabel "integrations_node_exporter" {
+  targets = prometheus.exporter.unix.integrations_node_exporter.targets
+
+  rule {
+    target_label = "instance"
+    replacement  = constants.hostname
+  }
+
+  rule {
+    target_label = "job"
+    replacement = "integrations/node_exporter"
+  }
+}
+
+prometheus.scrape "integrations_node_exporter" {
+  scrape_interval = "15s"
+  targets    = discovery.relabel.integrations_node_exporter.output
+  forward_to = [prometheus.remote_write.default.receiver]
 }

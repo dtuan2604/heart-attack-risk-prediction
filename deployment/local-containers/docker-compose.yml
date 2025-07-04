@@ -9,12 +9,14 @@ services:
       dockerfile: app/Dockerfile
     container_name: heart-attack-prediction-api
     environment:
-      - DISABLE_TRACING=false
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4317
+      - SERVICE_NAME=heart-attack-prediction-service
+      - METRIC_PORT=8081
     networks:
       - hara-local-containers
     ports:
       - "8080:30000"
+      - "8081:8081"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:30000/health"]
@@ -38,7 +40,7 @@ services:
       - api
 
   alloy:
-    image: grafana/alloy:latest
+    image: grafana/alloy:v1.8.2
     container_name: alloy
     volumes:
       - ./config/config.alloy:/etc/alloy/config.alloy:ro
@@ -50,7 +52,7 @@ services:
       - hara-local-containers
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.5.0
     container_name: loki
     volumes:
       - ./config/loki-local-config.yml:/etc/loki/local-config.yml:ro
@@ -73,7 +75,7 @@ services:
       - MEMCACHED_THREADS=4       # Number of threads to use
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.7.2
     container_name: tempo
     volumes:
       - ./config/tempo.yml:/etc/tempo.yml
@@ -86,8 +88,22 @@ services:
     depends_on:
       - memcached
 
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    container_name: prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./config/prometheus-data:/prometheus
+    command:
+      - --web.enable-remote-write-receiver
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - hara-local-containers
+
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.6.1
     container_name: grafana
     volumes:
       - ./config/grafana/provisioning:/etc/grafana/provisioning
@@ -96,8 +112,9 @@ services:
     ports:
       - 3000:3000
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=changeme
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
     networks:
       - hara-local-containers
 
@@ -105,3 +122,4 @@ volumes:
   tempo-data:
   loki-data:
   grafana-data:
+  prometheus-data:

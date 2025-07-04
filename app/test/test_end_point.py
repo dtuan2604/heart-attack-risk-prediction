@@ -113,19 +113,21 @@ def setup_environment(monkeypatch, mocker):
     """Fixture to set up environment variables for testing."""
     monkeypatch.setenv("MODEL_PATH", MOCKED_MODEL_PATH)
     monkeypatch.setenv("SCALER_PATH", MOCKED_SCALER_PATH)
+    monkeypatch.setenv("DISABLE_TRACING", "true")
+    monkeypatch.setenv("DISABLE_METRICS", "true")
+    mocker.patch("src.main.reqs_counter")
+    mocker.patch("src.main.latency_hist")
 
 
 def test_app_initialization(mocker):
     mocked_load_model = mocker.patch("joblib.load", return_value=mocker.Mock())
-    mocked_init_tracer = mocker.patch("src.main.init_tracer")
+
     with TestClient(app) as client:
         pass
 
     mocked_load_model.assert_any_call(MOCKED_MODEL_PATH)
     mocked_load_model.assert_any_call(MOCKED_SCALER_PATH)
     mocked_load_model.call_count == 2, "Model and scaler should be loaded once each"
-    mocked_init_tracer.assert_called_once_with(service_name="hara-service")
-    mocked_init_tracer.call_count == 1, "Tracer should be initialized once"
 
 
 def test_root(mocker):
@@ -190,5 +192,17 @@ def test_predict_endpoint_with_bad_patient_record(
     mocked_model.predict_proba.assert_not_called()
 
     response_json = response.json()
-    print(response_json)
     assert response_json["detail"][0]["type"] == expected_error
+
+
+def test_runtime_error_while_hitting_request(mocker):
+    mocked_load_model = mocker.patch("joblib.load", return_value=mocker.Mock())
+    mocker.patch("src.main.preprocess_input", side_effect=RuntimeError("Fake error"))
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.post(
+            "/predict",
+            content=generate_random_patient_record().model_dump_json(),
+            headers={"Content-Type": "application/json"},
+        )
+    assert response.status_code == 500
+    assert "Server Error" in response.json()["detail"]

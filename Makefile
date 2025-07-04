@@ -18,7 +18,10 @@ run-api-local:
 
 dev-unit-test:
 	@echo "Running unit tests..."
-	PYTHONPATH=app/src DISABLE_TRACING=true pytest --cache-clear
+	PYTHONPATH=app/src \
+	DISABLE_TRACING=true \
+	DISABLE_METRICS=true \
+	pytest --cache-clear
 
 clean-up-python-cache:
 	@echo "Cleaning up Python cache..."

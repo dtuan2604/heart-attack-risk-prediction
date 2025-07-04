@@ -27,3 +27,11 @@ datasources:
         datasourceUid: prometheus
       nodeGraph:
         enabled: true
+  - name: Prometheus
+    type: prometheus
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false

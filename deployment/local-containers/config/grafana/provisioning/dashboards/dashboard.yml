@@ -7,4 +7,10 @@ providers:
     folder: ''
     type: file
     options:
-      path: /var/lib/grafana/dashboards
+      path: /var/lib/grafana/dashboards/loki-dashboard.json
+  - name: 'Prometheus Dashboards'
+    orgId: 1
+    folder: ''
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards/prometheus-dashboard.json

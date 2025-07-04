@@ -11,7 +11,7 @@ from .tracing_utils import trace_span
 @trace_span("load_model")
 async def load_model(model_path: str) -> Optional[object]:
     """
-    Load a machine learning model from a specified path. Return None if loading fails.
+    Load a machine learning model from a specified path. Raise RuntimeError if loading fails.
 
     Args:
         model_path (str): The file path to the model.
