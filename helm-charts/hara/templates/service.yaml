@@ -8,8 +8,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - port: {{ .Values.portConfig.loadBalancer.app }}
       protocol: TCP
