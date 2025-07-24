@@ -1,0 +1,11 @@
+default:
+  repoURL: "https://github.com/dtuan2604/heart-attack-risk-prediction.git"
+  targetRevision: "main"
+  destinationServer: "https://kubernetes.default.svc"
+
+applications:
+  heart-attack-risk-prediction:
+    enabled: true
+    namespace: model-serving
+    helmChartPath: helm-charts/hara
+    extraValuesFile:

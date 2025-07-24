@@ -3,13 +3,16 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}
-  namespace: model-serving
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
-    app: {{ .Release.Name }}
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
-    - port: 30000
+    - port: {{ .Values.portConfig.loadBalancer.app }}
       protocol: TCP
-      targetPort: 30000
+      targetPort: {{ .Values.portConfig.app.http }}
   type: ClusterIP

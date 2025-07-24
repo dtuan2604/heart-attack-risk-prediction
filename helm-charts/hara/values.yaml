@@ -1,10 +1,43 @@
-nameSpace: model-serving
-
-nginxHostName: hospital.heart.com
-
+replicaCount: 2
 image:
   repository: tysonhoang/heart-attack-risk-prediction
   tag: latest
   pullPolicy: Always
 
-appVersion: "1.0.0"
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+podMonitor:
+  enabled: false
+  labels:
+    release: prometheus
+  interval: 15s
+  scrapeTimeout: 10s
+env:
+  - name: SERVICE_NAME
+    value:
+  - name: APP_VERSION
+    value:
+  - name: METRIC_PORT
+    value:
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value:
+  - name: DISABLE_TRACING
+    value: "true"
+  - name: DISABLE_METRICS
+    value: "true"
+portConfig:
+  app:
+    http: 30000
+    httpMetrics: 30001
+  loadBalancer:
+    app: 30000

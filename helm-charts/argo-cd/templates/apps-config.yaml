@@ -1,0 +1,41 @@
+{{- /*
+  Iterate over the list of applications provided in $.Values.applications and create an Argo CD Application resource for each.
+*/}}
+
+{{- range $appName, $appConfig := .Values.applications }}
+{{- if $appConfig.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $appName | quote }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io # Ensure relevant resources are cleaned up
+spec:
+  project: default
+  sources:
+    - repoURL: {{ $.Values.default.repoURL | quote }}
+      path: {{ $appConfig.helmChartPath | quote }}
+      targetRevision: {{ $.Values.default.targetRevision | quote }}
+      {{- if $appConfig.extraValuesFile }}
+      helm:
+        valueFiles:
+          - $values/{{ $appConfig.extraValuesFile }}
+      {{- end }}
+    {{- if $appConfig.extraValuesFile }}
+    - repoURL: {{ $.Values.default.repoURL | quote }}
+      targetRevision: {{ $.Values.default.targetRevision | quote }}
+      ref: values
+    {{- end }}
+  destination:
+    server: {{ $.Values.default.destinationServer | quote }}
+    namespace: {{ $appConfig.namespace | quote }}
+  syncPolicy:
+    automated: # Single source of truth for existing applications in Kubernetes
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+{{- end }}
+{{- end }}

@@ -79,3 +79,7 @@ help:
 	@echo "\t make update-cluster-policy\t- Update cluster policy"
 	@echo "\t make get-jenkin-deployer-token\t- Get Jenkins deployer token"
 	@echo "\t make start-nginx-system\t- Start Nginx system in cluster"
+
+
+# kubectl create namespace argocd
+# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
