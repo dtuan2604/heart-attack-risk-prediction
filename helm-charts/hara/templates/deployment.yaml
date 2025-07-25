@@ -52,4 +52,4 @@ spec:
             failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
           {{- end }}
           env:
-            {{- toYaml .Values.env | nindent 12 }}
+            {{- toYaml .Values.env | nindent 11 }}
