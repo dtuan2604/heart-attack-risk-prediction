@@ -5,7 +5,7 @@ default:
 
 applications:
   heart-attack-risk-prediction:
-    enabled: true
+    enabled: false
     namespace: model-serving
     helmChartPath: helm-charts/hara
     extraValuesFile:
