@@ -3,7 +3,7 @@ image:
   repository: tysonhoang/heart-attack-risk-prediction
   tag: latest
   pullPolicy: Always
-
+nginxHostName: healthcare.example.com
 livenessProbe:
   enabled: true
   initialDelaySeconds: 15

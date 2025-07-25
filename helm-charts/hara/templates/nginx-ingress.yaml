@@ -2,10 +2,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-nginx-ingress
-  namespace: {{ .Values.nameSpace }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Release.Name }}
-    version: {{ .Values.appVersion }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   ingressClassName: nginx
   rules:
