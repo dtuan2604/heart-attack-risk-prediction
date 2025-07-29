@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: "heart-attack-risk-prediction-change-name-again-after-3-mins"
+  name: "heart-attack-risk-prediction"
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io # Ensure relevant resources are cleaned up
