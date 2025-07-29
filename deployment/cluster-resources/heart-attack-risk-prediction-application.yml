@@ -1,25 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-of-apps
+  name: "heart-attack-risk-prediction-application"
   namespace: {{ $.Values.global.argoResourceNamespace | quote }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io # Ensure relevant resources are cleaned up
 spec:
   project: default
   sources:
     - repoURL: {{ $.Values.global.repoURL | quote }}
+      path: "helm-charts/hara"
       targetRevision: {{ $.Values.global.targetRevision | quote }}
-      path: {{ $.Values.global.clusterResourcePath | quote }}  # points to the folder with all child app YAMLs
-      helm:
-          valueFiles:
-            - $values/helm-charts/argo-cd/templates/values.yml
-    - repoURL: {{ $.Values.global.repoURL | quote }}
-      targetRevision: {{ $.Values.global.targetRevision | quote }}
-      ref: values
   destination:
     server: {{ $.Values.global.destinationServer | quote }}
     namespace: {{ $.Values.global.argoResourceNamespace | quote }}
   syncPolicy:
-    automated:
+    automated: # Single source of truth for existing applications in Kubernetes
       prune: true
       selfHeal: true
     syncOptions:
