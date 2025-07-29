@@ -11,7 +11,7 @@ spec:
       path: {{ $.Values.global.clusterResourcePath | quote }}  # points to the folder with all child app YAMLs
       helm:
           valueFiles:
-            - $values/helm-charts/argo-cd/templates/values.yml
+            - $values/helm-charts/argo-cd/values.yaml
     - repoURL: {{ $.Values.global.repoURL | quote }}
       targetRevision: {{ $.Values.global.targetRevision | quote }}
       ref: values
