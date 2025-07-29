@@ -2,17 +2,17 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: "heart-attack-risk-prediction-application"
-  namespace: {{ $.Values.global.argoResourceNamespace | quote }}
+  namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io # Ensure relevant resources are cleaned up
 spec:
   project: default
   sources:
-    - repoURL: {{ $.Values.global.repoURL | quote }}
+    - repoURL: "https://github.com/dtuan2604/heart-attack-risk-prediction.git"
       path: "helm-charts/hara"
-      targetRevision: {{ $.Values.global.targetRevision | quote }}
+      targetRevision: "main"
   destination:
-    server: {{ $.Values.global.destinationServer | quote }}
+    server: "https://kubernetes.default.svc"
     namespace: "model-serving"
   syncPolicy:
     automated: # Single source of truth for existing applications in Kubernetes
