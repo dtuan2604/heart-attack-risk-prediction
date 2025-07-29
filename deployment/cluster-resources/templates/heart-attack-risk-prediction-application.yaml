@@ -13,7 +13,7 @@ spec:
       targetRevision: {{ $.Values.global.targetRevision | quote }}
   destination:
     server: {{ $.Values.global.destinationServer | quote }}
-    namespace: {{ $.Values.global.argoResourceNamespace | quote }}
+    namespace: "model-serving"
   syncPolicy:
     automated: # Single source of truth for existing applications in Kubernetes
       prune: true
