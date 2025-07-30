@@ -5,10 +5,16 @@ metadata:
   namespace: {{ $.Values.global.argoResourceNamespace | quote }}
 spec:
   project: default
-  source:
-    repoURL: {{ $.Values.global.repoURL | quote }}
-    targetRevision: {{ $.Values.global.targetRevision | quote }}
-    path: {{ $.Values.global.clusterResourcePath | quote }}  # points to the folder with all child app YAMLs
+  sources:
+    - repoURL: {{ $.Values.global.repoURL | quote }}
+      targetRevision: {{ $.Values.global.targetRevision | quote }}
+      path: {{ $.Values.global.clusterResourcePath | quote }}  # points to the folder with all child app YAMLs
+      helm:
+        valueFiles:
+          - $values/helm-charts/argo-cd/values.yaml
+    - repoURL: {{ $.Values.global.repoURL | quote }}
+      targetRevision: {{ $.Values.global.targetRevision | quote }}
+      ref: values
   destination:
     server: {{ $.Values.global.destinationServer | quote }}
     namespace: {{ $.Values.global.argoResourceNamespace | quote }}
