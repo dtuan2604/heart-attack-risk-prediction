@@ -12,9 +12,8 @@ spec:
     path: "helm-charts/nginx-ingress"
     targetRevision: "main"
     helm:
-      parameters:
-        - name: fullnameOverride
-          value: "nginx-ingress-controller"
+      values: |
+        fullnameOverride: nginx-ingress
   destination:
     server: "https://kubernetes.default.svc"
     namespace: "nginx-system"
