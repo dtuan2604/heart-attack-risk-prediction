@@ -40,4 +40,4 @@ portConfig:
     http: 30000
     httpMetrics: 30001
   loadBalancer:
-    app: 30000
+    http: 30000
