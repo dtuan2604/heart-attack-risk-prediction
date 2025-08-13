@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: "kube-prometheus-stack"
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io # Ensure relevant resources are cleaned up
+spec:
+  project: default
+  source:
+    repoURL: "https://github.com/dtuan2604/heart-attack-risk-prediction.git"
+    path: "helm-charts/kube-prometheus-stack"
+    targetRevision: "main"
+    helm:
+      valueFiles:
+        - custom-values.yaml
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: "monitoring"
+  syncPolicy:
+    automated: # Single source of truth for existing applications in Kubernetes
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
