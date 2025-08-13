@@ -1,0 +1,168 @@
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces
+suite: Feature - Cluster Events
+templates:
+  - alloy-config.yaml
+  - validations.yaml
+tests:
+  - it: requires a log destination
+    set:
+      cluster:
+        name: ci-test-cluster
+      clusterEvents:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            execution error at (k8s-monitoring/templates/validations.yaml:1:4):
+            No destinations found that can accept logs from Kubernetes Cluster events
+            Please add a destination with logs support.
+            See https://github.com/grafana/k8s-monitoring-helm/blob/main/charts/k8s-monitoring/docs/destinations/README.md for more details.
+
+  - it: requires the alloy-singleton collector
+    set:
+      cluster:
+        name: ci-test-cluster
+      destinations:
+        - name: loki
+          type: loki
+          url: http://loki.loki.svc:3100/api/push
+      clusterEvents:
+        enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: |-
+            execution error at (k8s-monitoring/templates/validations.yaml:1:4):
+            The Kubernetes Cluster events feature requires the use of the alloy-singleton collector.
+
+            Please enable it by setting:
+            alloy-singleton:
+              enabled: true
+
+  - it: renders the config to gather Kubernetes Cluster Events
+    template: alloy-config.yaml
+    set:
+      cluster:
+        name: ci-test-cluster
+      destinations:
+        - name: loki
+          type: loki
+          url: http://loki.loki.svc:3100/api/push
+      clusterEvents:
+        enabled: true
+      alloy-singleton:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["config.alloy"]
+
+  - it: prefers a Loki destination, over an OTLP one
+    template: alloy-config.yaml
+    set:
+      cluster:
+        name: ci-test-cluster
+      destinations:
+        - name: loki
+          type: loki
+          url: http://loki.loki.svc:3100/api/push
+        - name: otlp
+          type: otlp
+          url: http://otlp.otlp.svc:4317
+          logs: {enabled: true}
+      clusterEvents:
+        enabled: true
+      alloy-singleton:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: loki.write.loki.receiver
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: otelcol.receiver.loki.otlp.receiver
+
+  - it: will use the OTLP destination, if it's the only option
+    template: alloy-config.yaml
+    set:
+      cluster:
+        name: ci-test-cluster
+      destinations:
+        - name: otlp
+          type: otlp
+          url: http://otlp.otlp.svc:4317
+          logs: {enabled: true}
+      clusterEvents:
+        enabled: true
+      alloy-singleton:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: otelcol.receiver.loki.otlp.receiver
+
+  - it: will use the OTLP destination, if it's told to
+    template: alloy-config.yaml
+    set:
+      cluster:
+        name: ci-test-cluster
+      destinations:
+        - name: loki
+          type: loki
+          url: http://loki.loki.svc:3100/api/push
+        - name: otlp
+          type: otlp
+          url: http://otlp.otlp.svc:4317
+          logs: {enabled: true}
+      clusterEvents:
+        enabled: true
+        destinations: [otlp]
+      alloy-singleton:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: |-
+            \s*logs_destinations = \[
+            \s*  otelcol.receiver.loki.otlp.receiver,
+            \s*]
+      - notMatchRegex:
+          path: data["config.alloy"]
+          pattern: |-
+            \s*logs_destinations = \[
+            \s*  loki.write.loki.receiver,
+            \s*]
+
+  - it: will use both, if it's told to
+    template: alloy-config.yaml
+    set:
+      cluster:
+        name: ci-test-cluster
+      destinations:
+        - name: loki
+          type: loki
+          url: http://loki.loki.svc:3100/api/push
+        - name: otlp
+          type: otlp
+          url: http://otlp.otlp.svc:4317
+          logs: {enabled: true}
+      clusterEvents:
+        enabled: true
+        destinations: [loki, otlp]
+      alloy-singleton:
+        enabled: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: loki.write.loki.receiver
+      - matchRegex:
+          path: data["config.alloy"]
+          pattern: otelcol.receiver.loki.otlp.receiver

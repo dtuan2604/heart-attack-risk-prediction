@@ -1,0 +1,4 @@
+# Profiles Receiver
+
+This example demonstrates how to enable the Profiles Receiver feature to receive profiles from applicaations on your
+Kubernetes cluster, process them according to defined rules, and then deliver them to Pyroscope.

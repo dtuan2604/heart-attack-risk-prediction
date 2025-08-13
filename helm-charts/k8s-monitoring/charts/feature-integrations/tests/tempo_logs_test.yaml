@@ -1,0 +1,183 @@
+---
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces rule:empty-lines
+suite: Test Tempo Integration - Logs
+templates:
+  - configmap.yaml
+tests:
+  - it: should add the Tempo processing stage to the logs config
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["metrics.alloy"]
+
+  - it: should allow you to restrict the namespaces for logs
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+            namespaces:
+              - k8smon
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["logs.alloy"]
+          # The pattern should look like this, but since the regex is escaped, it will be a bit different
+          # rule {
+          #   source_labels = ["__meta_kubernetes_namespace","__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          #   regex = "(?:k8smon);(?:tempo)"
+          #   target_label = "integration"
+          #   replacement = "tempo"
+          # }
+          pattern: |-
+            \s*rule {
+            \s*  source_labels = \["__meta_kubernetes_namespace","__meta_kubernetes_pod_label_app_kubernetes_io_name"\]
+            \s*  separator = ";"
+            \s*  regex = "\(\?:k8smon\)\;\(\?:tempo\)"
+            \s*  target_label = "integration"
+            \s*  replacement = "tempo"
+            \s*}
+
+  - it: should allow you to set the timestamp format
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+            logs:
+              tuning:
+                timestampFormat: "RFC3339"
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["logs.alloy"]
+          pattern: |-
+            \s+stage.timestamp {
+            \s+  source = "ts"
+            \s+  format = "RFC3339"
+            \s+}
+
+  - it: should allow you to scrub the timestamp from the log line
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+            logs:
+              tuning:
+                scrubTimestamp: true
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["logs.alloy"]
+          # The pattern should look like this, but since the regex is escaped, it will be a bit different
+          # stage.replace {
+          #   expression = "(ts=[^ ]+\\s+)"
+          #   replace = ""
+          # }
+          pattern: |-
+            \s+stage.replace {
+            \s+  expression = "\(ts=\[\^ \]\+\\\\s\+\)"
+            \s+  replace = ""
+            \s+}
+
+  - it: should allow you to set the structured metadata
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+            logs:
+              tuning:
+                structuredMetadata:
+                  component: component
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["logs.alloy"]
+          pattern: |-
+            \s+stage.structured_metadata {
+            \s+  values = {
+            \s+    "component" = "component",
+            \s+  }
+            \s+}
+
+  - it: should allow you to drop log levels
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+            logs:
+              tuning:
+                dropLogLevels:
+                  - info
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["logs.alloy"]
+          # The pattern should look like this, but since the regex is escaped, it will be a bit different
+          # stage.drop {
+          #   source = "level"
+          #   expression = "(?i)(info)"
+          #   drop_counter_reason = "tempo-drop-log-level"
+          # }
+          pattern: |-
+            \s+stage.drop {
+            \s+  source = "level"
+            \s+  expression = "\(\?i\)\(info\)"
+            \s+  drop_counter_reason = "tempo-drop-log-level"
+            \s+}
+
+  - it: should allow you to exclude log lines
+    set:
+      deployAsConfigMap: true
+      tempo:
+        instances:
+          - name: tempo
+            labelSelectors:
+              app.kubernetes.io/name: tempo
+            logs:
+              tuning:
+                excludeLines:
+                  - logger=searchIndex
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchRegex:
+          path: data["logs.alloy"]
+          # The pattern should look like this, but since the regex is escaped, it will be a bit different
+          # stage.drop {
+          #   source = ""
+          #   expression = "(?i)(logger=searchIndex)"
+          #   drop_counter_reason = "tempo-exclude-line"
+          # }
+          pattern: |-
+            \s*stage.drop {
+            \s*  source = ""
+            \s*  expression = "\(\?i\)\(logger=searchIndex\)"
+            \s*  drop_counter_reason = "tempo-exclude-line"
+            \s*}

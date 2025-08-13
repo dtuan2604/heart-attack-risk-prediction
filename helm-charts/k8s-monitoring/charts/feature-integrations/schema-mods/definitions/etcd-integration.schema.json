@@ -1,0 +1,49 @@
+{
+    "type": "object",
+    "properties": {
+        "fieldSelectors": {
+            "type": "array"
+        },
+        "jobLabel": {
+            "type": "string"
+        },
+        "labelSelectors": {
+            "type": "object"
+        },
+        "metrics": {
+            "type": "object",
+            "properties": {
+                "maxCacheSize": {
+                    "type": "null"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "scrapeInterval": {
+                    "type": "null"
+                },
+                "tuning": {
+                    "type": "object",
+                    "properties": {
+                        "excludeMetrics": {
+                            "type": "array"
+                        },
+                        "includeMetrics": {
+                            "type": "array"
+                        }
+                    }
+                }
+            }
+        },
+        "name": {
+            "type": "string"
+        },
+        "namespaces": {
+            "type": "array"
+        },
+        "type": {
+            "type": "string",
+            "const": "etcd"
+        }
+    }
+}

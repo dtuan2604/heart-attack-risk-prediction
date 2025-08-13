@@ -1,0 +1,18 @@
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces
+suite: Test with prometheus.io annotations
+templates:
+  - configmap.yaml
+tests:
+  - it: creates a module with default discovery, scraping, and processing configurations
+    set:
+      deployAsConfigMap: true
+      annotations:
+        scrape: prometheus.io/scrape
+        metricsScheme: prometheus.io/scheme
+        metricsPath: prometheus.io/path
+        metricsPortNumber: prometheus.io/port
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["module.alloy"]

@@ -1,0 +1,47 @@
+<!--
+(NOTE: Do not edit README.md directly. It is a generated file!)
+(      To make changes, please modify README.md.gotmpl and run `helm-docs`)
+-->
+
+# Feature: Prometheus Operator Objects
+
+{{ template "chart.deprecationWarning" . }}
+
+The Prometheus Operator Objects feature enables the discovery, processing, and utilization of certain Prometheus
+Operator objects. Currently, this feature supports the following objects:
+
+| Object Type | Description |
+|-------------|-------------|
+| [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#servicemonitor) | A ServiceMonitor defines how to scrape metrics from Kubernetes Services. |
+| [PodMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#podmonitor) | A PodMonitor defines how to scrape metrics from Kubernetes Pods. |
+| [Probe](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#probe) | A Probe defines how to scrape metrics from prober exporters. |
+
+## Usage
+
+```yaml
+prometheusOperatorObjects:
+  enabled: true
+```
+
+## Testing
+
+This chart contains unit tests to verify the generated configuration. The hidden value `deployAsConfigMap` will render
+the generated configuration into a ConfigMap object. While this ConfigMap is not used during regular operation, you can
+use it to show the outcome of a given values file.
+
+The unit tests use this ConfigMap to create an object with the configuration that can be asserted against. To run the
+tests, use `helm test`.
+
+Be sure perform actual integration testing in a live environment in the main [k8s-monitoring](../..) chart.
+
+<!-- textlint-disable terminology -->
+{{ template "chart.maintainersSection" . }}
+<!-- textlint-enable terminology -->
+<!-- markdownlint-disable no-bare-urls -->
+<!-- markdownlint-disable list-marker-space -->
+{{ template "chart.sourcesSection" . }}
+<!-- markdownlint-enable list-marker-space -->
+
+{{ template "chart.requirementsSection" . }}
+<!-- markdownlint-enable no-bare-urls -->
+{{ template "chart.valuesSection" . }}

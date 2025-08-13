@@ -1,0 +1,23 @@
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces
+suite: Test default values
+templates:
+  - configmap.yaml
+tests:
+  - it: can use a specified list of namespaces
+    set:
+      deployAsConfigMap: true
+      namespaces: ["a", "b"]
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["module.alloy"]
+  - it: can exclude a specified list of namespaces
+    set:
+      deployAsConfigMap: true
+      excludeNamespaces: ["a", "b"]
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["module.alloy"]

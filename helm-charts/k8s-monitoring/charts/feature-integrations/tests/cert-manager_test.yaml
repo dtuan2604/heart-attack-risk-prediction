@@ -1,0 +1,34 @@
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces
+suite: Test cert-manager Integration - Metrics
+templates:
+  - configmap.yaml
+tests:
+  - it: should create the cert-manager config
+    set:
+      deployAsConfigMap: true
+      cert-manager:
+        instances:
+          - name: cert-manager
+            labelSelectors:
+              app.kubernetes.io/name: cert-manager
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["metrics.alloy"]
+
+  - it: can be restricted to a namespace
+    set:
+      deployAsConfigMap: true
+      cert-manager:
+        instances:
+          - name: my-cert-manager
+            labelSelectors:
+              app.kubernetes.io/name: my-cert-manager
+            namespaces:
+              - kube-system
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["metrics.alloy"]

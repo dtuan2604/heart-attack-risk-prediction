@@ -1,0 +1,34 @@
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces
+suite: Test etcd Integration - Metrics
+templates:
+  - configmap.yaml
+tests:
+  - it: should create the etcd config
+    set:
+      deployAsConfigMap: true
+      etcd:
+        instances:
+          - name: etcd
+            labelSelectors:
+              app.kubernetes.io/component: etcd
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["metrics.alloy"]
+
+  - it: can be restricted to a namespace
+    set:
+      deployAsConfigMap: true
+      etcd:
+        instances:
+          - name: my-etcd
+            labelSelectors:
+              app.kubernetes.io/component: my-etcd
+            namespaces:
+              - kube-system
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["metrics.alloy"]

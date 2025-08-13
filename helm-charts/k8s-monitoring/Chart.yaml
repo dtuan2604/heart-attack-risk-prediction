@@ -1,0 +1,74 @@
+---
+apiVersion: v2
+name: k8s-monitoring
+description: Capture all telemetry data from your Kubernetes cluster.
+type: application
+icon: https://raw.githubusercontent.com/grafana/grafana/main/public/img/grafana_icon.svg
+sources:
+  - https://github.com/grafana/k8s-monitoring-helm/tree/main/charts/k8s-monitoring
+version: 3.2.2
+appVersion: 3.2.2
+maintainers:
+  - email: pete.wall@grafana.com
+    name: petewall
+  - email: robert.lankford@grafana.com
+    name: rlankfo
+dependencies:
+  - alias: annotationAutodiscovery
+    name: feature-annotation-autodiscovery
+    repository: ""
+    version: 1.0.0
+    condition: annotationAutodiscovery.enabled
+  - alias: applicationObservability
+    name: feature-application-observability
+    repository: ""
+    version: 1.0.0
+    condition: applicationObservability.enabled
+  - alias: autoInstrumentation
+    name: feature-auto-instrumentation
+    repository: ""
+    version: 1.0.0
+    condition: autoInstrumentation.enabled
+  - alias: clusterEvents
+    name: feature-cluster-events
+    repository: ""
+    version: 1.0.0
+    condition: clusterEvents.enabled
+  - alias: clusterMetrics
+    name: feature-cluster-metrics
+    repository: ""
+    version: 1.0.0
+    condition: clusterMetrics.enabled
+  - alias: integrations
+    name: feature-integrations
+    repository: ""
+    version: 1.0.0
+  - alias: nodeLogs
+    name: feature-node-logs
+    repository: ""
+    version: 1.0.0
+    condition: nodeLogs.enabled
+  - alias: podLogs
+    name: feature-pod-logs
+    repository: ""
+    version: 1.0.0
+    condition: podLogs.enabled
+  - alias: profiling
+    name: feature-profiling
+    repository: ""
+    version: 1.0.0
+    condition: profiling.enabled
+  - alias: profilesReceiver
+    name: feature-profiles-receiver
+    repository: ""
+    version: 1.0.0
+    condition: profilesReceiver.enabled
+  - alias: prometheusOperatorObjects
+    name: feature-prometheus-operator-objects
+    repository: ""
+    version: 1.0.0
+    condition: prometheusOperatorObjects.enabled
+  - name: alloy-operator
+    version: 0.3.7
+    repository: https://grafana.github.io/helm-charts
+    condition: alloy-operator.deploy

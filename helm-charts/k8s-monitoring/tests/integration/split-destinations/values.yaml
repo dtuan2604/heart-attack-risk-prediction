@@ -1,0 +1,105 @@
+---
+cluster:
+  name: split-destinations-cluster
+
+destinations:
+  - name: allMetrics
+    type: prometheus
+    url: http://all-metrics-prometheus-server.all-dbs.svc:9090/api/v1/write
+    auth:
+      type: basic
+      username: promuser
+      password: prometheuspassword
+  - name: productionMetrics
+    type: prometheus
+    url: http://prod-metrics-prometheus-server.prod-dbs.svc:9090/api/v1/write
+    auth:
+      type: basic
+      username: promuser
+      password: prometheuspassword
+    metricProcessingRules: |-
+      write_relabel_config {
+        source_labels = ["namespace"]
+        regex = "production"
+        action = "keep"
+      }
+
+  - name: allLogs
+    type: loki
+    url: http://all-logs-loki.all-dbs.svc:3100/loki/api/v1/push
+    tenantId: "1"
+    auth:
+      type: basic
+      username: loki
+      password: lokipassword
+  - name: productionLogs
+    type: loki
+    url: http://prod-logs-loki.prod-dbs.svc:3100/loki/api/v1/push
+    tenantId: "1"
+    auth:
+      type: basic
+      username: loki
+      password: lokipassword
+    logProcessingStages: |-
+      stage.match {
+        selector = "{namespace!=\"production\"}"
+        action   = "drop"
+      }
+
+  - name: allTraces
+    type: otlp
+    url: all-traces-tempo.all-dbs.svc:4317
+    tls:
+      insecure: true
+      insecureSkipVerify: true
+    metrics: {enabled: false}
+    logs: {enabled: false}
+    traces: {enabled: true}
+
+  - name: productionTraces
+    type: otlp
+    url: prod-traces-tempo.prod-dbs.svc:4317
+    tls:
+      insecure: true
+      insecureSkipVerify: true
+    metrics: {enabled: false}
+    logs: {enabled: false}
+    traces: {enabled: true}
+    processors:
+      filters:
+        enabled: true
+        traces:
+          span:
+            - resource.attributes["k8s.namespace.name"] != "prod-dbs"
+
+autoInstrumentation:
+  enabled: true
+
+applicationObservability:
+  enabled: true
+  receivers:
+    otlp:
+      grpc:
+        enabled: true
+
+
+clusterMetrics:
+  enabled: true
+
+podLogs:
+  enabled: true
+
+alloy-metrics:
+  enabled: true
+
+alloy-logs:
+  enabled: true
+
+alloy-receiver:
+  enabled: true
+  alloy:
+    extraPorts:
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP

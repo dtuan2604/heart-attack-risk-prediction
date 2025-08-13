@@ -1,0 +1,43 @@
+---
+cluster:
+  name: control-plane-monitoring-test
+
+destinations:
+  - name: prometheus
+    type: prometheus
+    url: http://prometheus-server.prometheus.svc:9090/api/v1/write
+  - name: loki
+    type: loki
+    url: http://loki.loki.svc:3100/loki/api/v1/push
+    tenantId: "1"
+    auth:
+      type: basic
+      username: loki
+      password: lokipassword
+
+clusterMetrics:
+  enabled: true
+  controlPlane:
+    enabled: true
+  kubeletProbes:
+    enabled: true
+    nodeAddressFormat: proxy
+    metricsTuning:
+      includeMetrics: [".*"]
+
+clusterEvents:
+  enabled: true
+
+podLogs:
+  enabled: true
+
+alloy-metrics:
+  enabled: true
+  controller:
+    replicas: 2
+
+alloy-singleton:
+  enabled: true
+
+alloy-logs:
+  enabled: true

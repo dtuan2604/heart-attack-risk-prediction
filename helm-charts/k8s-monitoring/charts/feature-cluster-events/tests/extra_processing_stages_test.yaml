@@ -1,0 +1,26 @@
+# yamllint disable rule:document-start rule:line-length rule:trailing-spaces
+suite: Test extra processing stages
+templates:
+  - configmap.yaml
+tests:
+  - it: should create a ConfigMap with extra processing stages
+    set:
+      deployAsConfigMap: true
+      extraLogProcessingStages: |-
+        stage.metrics {
+          metric.counter {
+            name        = "failures"
+            description = "total number of failed events"
+            prefix      = "kubernetes_event_"
+
+            action            = "inc"
+            max_idle_duration = "24h"
+            source            = "reason"
+            value             = "Failed"
+          }
+        }
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - matchSnapshot:
+          path: data["module.alloy"]

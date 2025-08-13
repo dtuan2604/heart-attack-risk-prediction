@@ -1,0 +1,3 @@
+# Integration: Mimir
+
+This example demonstrates how to gather metrics and logs from [Grafana Mimir](https://grafana.com/oss/mimir/).

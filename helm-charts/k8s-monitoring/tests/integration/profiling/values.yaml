@@ -1,0 +1,34 @@
+---
+cluster:
+  name: profiling-feature-test
+
+destinations:
+  - name: pyro
+    type: pyroscope
+    url: http://pyroscope.pyroscope.svc:4040
+
+profiling:
+  enabled: true
+
+alloy-profiles:
+  enabled: true
+
+extraObjects:
+  - apiVersion: collectors.grafana.com/v1alpha1
+    kind: Alloy
+    metadata:
+      name: profile-source
+    spec:
+      alloy:
+        extraPorts: # Open an extra port to check for proper scrape targeting
+         - name: "faro"
+           port: 12347
+           targetPort: 12347
+           protocol: "TCP"
+           appProtocol: "h2c"
+      controller:
+        podAnnotations:
+          profiles.grafana.com/memory.scrape: "true"
+          profiles.grafana.com/memory.path: /debug/pprof/heap
+          profiles.grafana.com/memory.port: "12345"
+          profiles.grafana.com/memory.container: alloy
