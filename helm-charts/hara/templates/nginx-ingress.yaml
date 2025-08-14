@@ -12,6 +12,13 @@ spec:
   - host: {{ .Values.nginxHostName }}
     http:
       paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: {{ .Values.portConfig.loadBalancer.http }}
       - path: /docs
         pathType: Prefix
         backend:
