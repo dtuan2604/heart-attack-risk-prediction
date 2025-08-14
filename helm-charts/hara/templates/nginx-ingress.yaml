@@ -1,49 +1,49 @@
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: {{ .Release.Name }}
-#   namespace: {{ .Release.Namespace }}
-#   labels:
-#     app.kubernetes.io/name: {{ .Release.Name }}
-#     app.kubernetes.io/instance: {{ .Release.Name }}
-# spec:
-#   ingressClassName: nginx
-#   rules:
-#   - host: {{ .Values.nginxHostName }}
-#     http:
-#       paths:
-#       - path: /
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: {{ .Release.Name }}
-#             port:
-#               number: {{ .Values.portConfig.loadBalancer.http }}
-#       - path: /docs
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: {{ .Release.Name }}
-#             port:
-#               number: {{ .Values.portConfig.loadBalancer.http }}
-#       - path: /openapi.json
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: {{ .Release.Name }}
-#             port:
-#               number: {{ .Values.portConfig.loadBalancer.http }}
-#       - path: /health
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: {{ .Release.Name }}
-#             port:
-#               number: {{ .Values.portConfig.loadBalancer.http }}
-#       - path: /predict
-#         pathType: Prefix
-#         backend:
-#           service:
-#             name: {{ .Release.Name }}
-#             port:
-#               number: {{ .Values.portConfig.loadBalancer.http }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.nginxHostName }}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: {{ .Values.portConfig.loadBalancer.http }}
+      - path: /docs
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: {{ .Values.portConfig.loadBalancer.http }}
+      - path: /openapi.json
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: {{ .Values.portConfig.loadBalancer.http }}
+      - path: /health
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: {{ .Values.portConfig.loadBalancer.http }}
+      - path: /predict
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}
+            port:
+              number: {{ .Values.portConfig.loadBalancer.http }}
