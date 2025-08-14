@@ -23,7 +23,7 @@ grafana:
       kubernetes.io/ingress.class: nginx
       kubernetes.io/tls-acme: "false"
     hosts:
-      - tyson.healthservice.grafana.com
+      - healthservice.grafana.com
   plugins:
     - grafana-exploretraces-app
 
