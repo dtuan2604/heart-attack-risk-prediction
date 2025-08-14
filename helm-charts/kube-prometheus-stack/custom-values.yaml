@@ -17,13 +17,12 @@ grafana:
     feature_toggles:
       enable: traceqlEditor
   ingress:
-    enabled: true
+    enabled: false
     ingressClassName: nginx
     annotations:
       kubernetes.io/ingress.class: nginx
       kubernetes.io/tls-acme: "false"
-    hosts:
-      - healthservice.grafana.com
+    hosts: healthservice.grafana.com
   plugins:
     - grafana-exploretraces-app
 
